@@ -12,7 +12,7 @@ const sadBears = [
     "https://media.tenor.com/kw2xrhnN1U8AAAAm/tkthao219-bubududu.webp",
 ];
 
-const happyBear = "https://media.tenor.com/aZZNd6AZPCoAAAAm/heart-happy.webp";
+const happyBear = "https://media.tenor.com/_1xqhO5RzVYAAAAm/i-miss-you-bear-milk-and-mocha.webp";
 
 export const ValentineProposal = () => {
     const [noPos, setNoPos] = useState({ x: 0, y: 0 });
@@ -32,8 +32,30 @@ export const ValentineProposal = () => {
         const rangeX = isMobile ? 100 : 300;
         const rangeY = isMobile ? 100 : 300;
 
-        const x = Math.random() * (rangeX * 2) - rangeX; 
-        const y = Math.random() * (rangeY * 2) - rangeY; 
+        let x, y;
+        
+        // On mobile, force button away from center for first 5 attempts
+        if (isMobile) {
+             // On mobile, limit Y to mostly negative values (move UP) to avoid footer
+             // rangeY is 100. We want y to be between -150 and 50 (mostly up)
+             // Adjusted rangeY for mobile to be more vertical
+             
+             const mobileRangeY = 200; // Increased range
+             const mobileRangeX = 100;
+
+             // Force it to go much higher up (above the Yes button and into the card area)
+             // Y will be between -120 and -320
+             y = -(Math.random() * mobileRangeY + 120); 
+             
+             x = Math.random() * (mobileRangeX * 2) - mobileRangeX;
+             
+             // Clamp to prevent it going off the very top of the card if needed, 
+             // but allow it to go high enough to clear the Yes button completely.
+             y = Math.max(-400, Math.min(y, -120)); 
+        } else {
+             x = Math.random() * (rangeX * 2) - rangeX; 
+             y = Math.random() * (rangeY * 2) - rangeY; 
+        }
 
         setNoPos({ x, y });
         setYesScale(prev => Math.min(prev + 0.15, 2.5));
@@ -132,45 +154,73 @@ export const ValentineProposal = () => {
 
                         <p className="text-romantic-400 font-medium tracking-widest uppercase text-xs">A special question for a special someone</p>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mt-4">
+                        <div className="relative flex flex-col sm:flex-row items-center justify-center gap-8 mt-8 min-h-[100px]">
+                            {/* Yes Button */}
                             <motion.button
                                 style={{ scale: yesScale }}
                                 whileHover={{ scale: yesScale + 0.1 }}
                                 whileTap={{ scale: yesScale - 0.1 }}
                                 onClick={onAccept}
-                                className="bg-gradient-to-r from-romantic-600 to-romantic-400 text-white px-10 py-4 rounded-full font-bold shadow-xl shadow-romantic-200/50 flex items-center gap-2 btn-pulse relative overflow-hidden"
+                                className="bg-gradient-to-r from-romantic-600 to-romantic-400 text-white px-10 py-4 rounded-full font-bold shadow-xl shadow-romantic-200/50 flex items-center gap-2 btn-pulse relative overflow-hidden z-20 mb-8 sm:mb-0"
                             >
                                 YES! <Stars className="w-5 h-5 fill-white/20" />
                             </motion.button>
 
-                            <motion.div 
-                                className="relative"
-                                animate={{ x: noPos.x, y: noPos.y }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            >
+                            {/* No Button Area */}
+                            <div className="relative">
+                                {/* Message - Fixed in place, only shows after first interaction */}
                                 <AnimatePresence mode='wait'>
-                                    <motion.div
-                                        key={thought}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: -45 }}
-                                        exit={{ opacity: 0, scale: 0.5 }}
-                                        className="absolute left-1/2 -translate-x-1/2 -top-2 w-max pointer-events-none"
-                                    >
-                                        <span className="bg-white/90 px-3 py-1 rounded-full text-romantic-600 text-sm font-bold shadow-sm border border-romantic-100">
-                                            {thought}
-                                        </span>
-                                    </motion.div>
+                                    {noCount > 0 && (
+                                        <motion.div
+                                            key={thought}
+                                            initial={{ opacity: 0, y: 10, x: '-50%' }}
+                                            animate={{ opacity: 1, y: -60, x: '-50%' }}
+                                            exit={{ opacity: 0, scale: 0.5, x: '-50%' }}
+                                            className="absolute left-1/2 top-0 w-max pointer-events-none z-40"
+                                        >
+                                            <span className="bg-white/90 px-4 py-2 rounded-xl text-romantic-600 text-sm font-bold shadow-md border 2 border-romantic-200 block">
+                                                {thought}
+                                            </span>
+                                            {/* Arrow for speech bubble */}
+                                            <div className="w-3 h-3 bg-white border-b border-r border-romantic-200 absolute left-1/2 -translate-x-1/2 -bottom-1.5 rotate-45"></div>
+                                        </motion.div>
+                                    )}
                                 </AnimatePresence>
-                                <motion.button
-                                    animate={{ scale: noScale }}
-                                    onMouseEnter={moveNo} // Only desktop
-                                    onTouchStart={moveNo} // For mobile
-                                    onClick={moveNo}
-                                    className="bg-white/80 text-romantic-600 border-2 border-romantic-100 px-10 py-4 rounded-full font-bold hover:bg-white transition-colors backdrop-blur-sm shadow-sm whitespace-nowrap"
+
+                                {/* No Button - Moves independently */}
+                                <motion.div
+                                    animate={{ 
+                                        x: noPos.x, 
+                                        y: noPos.y,
+                                        scale: noScale 
+                                    }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="relative z-50"
                                 >
-                                    No
-                                </motion.button>
-                            </motion.div>
+                                    <button
+                                        onMouseEnter={(e) => {
+                                            // Only move on mouse enter for desktop if not already moving
+                                            if (window.matchMedia("(hover: hover)").matches) {
+                                                console.log(e);
+                                                
+                                                moveNo();
+                                            }
+                                        }} 
+                                        onTouchStart={(e) => {
+                                            console.log(e);
+                                           // e.preventDefault(); // Prevent ghost clicks
+                                            moveNo();
+                                        }}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            moveNo();
+                                        }}
+                                        className="bg-white/80 text-romantic-600 border-2 border-romantic-100 px-10 py-4 rounded-full font-bold hover:bg-white transition-colors backdrop-blur-sm shadow-sm whitespace-nowrap cursor-pointer touch-manipulation"
+                                    >
+                                        No
+                                    </button>
+                                </motion.div>
+                            </div>
                         </div>
                     </motion.div>
                 )}
