@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Heart, Stars, Sparkles } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { Heart, Stars, Sparkles, Share2 } from 'lucide-react';
 
 
 const sadBears = [
@@ -19,9 +20,54 @@ export const ValentineProposal = () => {
     const [isAccepted, setIsAccepted] = useState(false);
     const [noScale, setNoScale] = useState(1);
     const [yesScale, setYesScale] = useState(1);
-    const [thought, setThought] = useState("Click me?");
     const [noCount, setNoCount] = useState(0);
+    const [thought, setThought] = useState("Click me?");
+    const cardRef = useRef<HTMLDivElement>(null);
 
+    // const [noStyle, setNoStyle] = useState({});
+
+    const handleShare = async () => {
+        if (!cardRef.current) return;
+        
+        try {
+            const canvas = await html2canvas(cardRef.current, {
+                backgroundColor: '#fff1f2',
+                scale: 2,
+                useCORS: true,
+                ignoreElements: (element) => element.classList.contains('hide-on-share')
+            });
+            
+            canvas.toBlob(async (blob) => {
+                if (!blob) return;
+                
+                if (navigator.share) {
+                    try {
+                        const file = new File([blob], 'forever-us.png', { type: 'image/png' });
+                        await navigator.share({
+                            title: 'She said YES! ❤️',
+                            text: 'This Valentine’s, my answer is YES. 💖✨',
+                            files: [file]
+                        });
+                    } catch (err) {
+                        // Fallback if sharing files fails (some browsers only support text/url)
+                        console.warn('Sharing failed', err);
+                         const link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        link.download = 'forever-us.png';
+                        link.click();
+                    }
+                } else {
+                    // // Fallback: Download the image
+                    // const link = document.createElement('a');
+                    // link.href = canvas.toDataURL('image/png');
+                    // link.download = 'forever-us.png';
+                    // link.click();
+                }
+            }, 'image/png');
+        } catch (error) {
+            console.error('Error creating screenshot:', error);
+        }
+    }
     // const [noStyle, setNoStyle] = useState({});
 
     const moveNo = () => {
@@ -66,7 +112,6 @@ export const ValentineProposal = () => {
         setThought(thoughts[Math.floor(Math.random() * thoughts.length)]);
     };
 
-
     const onAccept = () => {
         setIsAccepted(true);
         const duration = 5 * 1000;
@@ -75,7 +120,7 @@ export const ValentineProposal = () => {
 
         const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-        const interval: any = setInterval(function () {
+        const interval = setInterval(function () {
             const timeLeft = animationEnd - Date.now();
 
             if (timeLeft <= 0) {
@@ -94,14 +139,16 @@ export const ValentineProposal = () => {
                 {isAccepted ? (
                     <motion.div
                         key="success"
+                        ref={cardRef}
                         initial={{ scale: 0, opacity: 0, rotate: -20 }}
                         animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                        className="text-center p-12 glass-2 space-y-6 max-w-lg"
+                        className="text-center p-12 glass-2 space-y-6 max-w-lg relative"
                     >
                         <motion.img 
                             src={happyBear} 
                             alt="Happy Bears" 
                             className=" mx-auto rounded-xl shadow-lg mb-6"
+                            crossOrigin="anonymous"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ type: "spring", stiffness: 200, damping: 15 }}
@@ -119,6 +166,16 @@ export const ValentineProposal = () => {
                         <p className="text-xl font-serif text-romantic-800 leading-relaxed italic">
                             "You just made me the happiest person in the world. I can't wait to spend every Valentine's Day with you!"
                         </p>
+                        <div className="flex justify-center gap-4 pt-4 hide-on-share">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleShare}
+                                className="bg-romantic-600/10 hover:bg-romantic-600/20 text-romantic-700 px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-colors border-2 border-romantic-200"
+                            >
+                                <Share2 className="w-4 h-4" /> Share Our Love
+                            </motion.button>
+                        </div>
                         <Sparkles className="w-8 h-8 text-yellow-400 mx-auto animate-spin-slow" />
                     </motion.div>
                 ) : (
@@ -198,16 +255,13 @@ export const ValentineProposal = () => {
                                     className="relative z-50"
                                 >
                                     <button
-                                        onMouseEnter={(e) => {
+                                        onMouseEnter={() => {
                                             // Only move on mouse enter for desktop if not already moving
                                             if (window.matchMedia("(hover: hover)").matches) {
-                                                console.log(e);
-                                                
                                                 moveNo();
                                             }
                                         }} 
-                                        onTouchStart={(e) => {
-                                            console.log(e);
+                                        onTouchStart={() => {
                                            // e.preventDefault(); // Prevent ghost clicks
                                             moveNo();
                                         }}

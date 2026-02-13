@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
-const Heart = ({ delay, left, size, color }: { delay: number; left: string; size: number; color: string }) => {
+const colors = ['#FDA4AF', '#F43F5E', '#BE123C', '#FB7185', '#FFFFFF'];
+
+const Heart = ({ delay, duration, left, size, color }: { delay: number; duration: number; left: string; size: number; color: string }) => {
     const { scrollYProgress } = useScroll();
     const yParallax = useTransform(scrollYProgress, [0, 1], [0, -200]);
 
@@ -15,7 +17,7 @@ const Heart = ({ delay, left, size, color }: { delay: number; left: string; size
                 scale: [0, 1, 1, 0.3]
             }}
             transition={{
-                duration: 12 + Math.random() * 8,
+                duration,
                 delay,
                 repeat: Infinity,
                 ease: "linear"
@@ -31,19 +33,16 @@ const Heart = ({ delay, left, size, color }: { delay: number; left: string; size
 };
 
 export const FloatingHearts = () => {
-    const [hearts, setHearts] = useState<any[]>([]);
-    const colors = ['#FDA4AF', '#F43F5E', '#BE123C', '#FB7185', '#FFFFFF'];
-
-    useEffect(() => {
-        const newHearts = Array.from({ length: 30 }).map((_, i) => ({
+    const [hearts] = useState(() => {
+        return Array.from({ length: 30 }).map((_, i) => ({
             id: i,
             delay: Math.random() * 15,
+            duration: 12 + Math.random() * 8,
             left: `${Math.random() * 100}%`,
             size: 10 + Math.random() * 30,
             color: colors[Math.floor(Math.random() * colors.length)]
         }));
-        setHearts(newHearts);
-    }, []);
+    });
 
     return (
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">

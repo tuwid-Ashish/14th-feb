@@ -1,7 +1,7 @@
 import { FloatingHearts } from './components/FloatingHearts';
 import { ValentineProposal } from './components/ValentineProposal';
-// import { CountdownTimer } from './components/CountdownTimer';
-// import { LoveNotes } from './components/LoveNotes';
+import { CountdownTimer } from './components/CountdownTimer';
+import { LoveNotes } from './components/LoveNotes';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { Music, Calendar, Heart, Share2 } from 'lucide-react';
 
@@ -46,6 +46,16 @@ function App() {
         {/* Hero Section */}
         <section className="w-full">
           <ValentineProposal />
+        </section>
+
+        {/* Timer Section */}
+        <section className="w-full">
+            <CountdownTimer />
+        </section>
+
+        {/* Notes Section */}
+        <section className="w-full">
+            <LoveNotes />
         </section>
 
         {/* Countdown Section */}
