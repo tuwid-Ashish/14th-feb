@@ -25,9 +25,15 @@ export const ValentineProposal = () => {
     // const [noStyle, setNoStyle] = useState({});
 
     const moveNo = () => {
-        // Move "little far" around the card (approx 300px range)
-        const x = Math.random() * 600 - 300; 
-        const y = Math.random() * 600 - 300; 
+        // Dynamic range based on viewport width
+        // Mobile (<640px): smaller range to prevent overflow
+        // Desktop: standard range
+        const isMobile = window.innerWidth < 640;
+        const rangeX = isMobile ? 100 : 300;
+        const rangeY = isMobile ? 100 : 300;
+
+        const x = Math.random() * (rangeX * 2) - rangeX; 
+        const y = Math.random() * (rangeY * 2) - rangeY; 
 
         setNoPos({ x, y });
         setYesScale(prev => Math.min(prev + 0.15, 2.5));
@@ -137,28 +143,34 @@ export const ValentineProposal = () => {
                                 YES! <Stars className="w-5 h-5 fill-white/20" />
                             </motion.button>
 
-                            <div className="relative">
-                                <AnimatePresence>
-                                    <motion.span
+                            <motion.div 
+                                className="relative"
+                                animate={{ x: noPos.x, y: noPos.y }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            >
+                                <AnimatePresence mode='wait'>
+                                    <motion.div
                                         key={thought}
                                         initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: -30 }} // Moved up to avoid overlap
-                                        exit={{ opacity: 0 }}
-                                        className="absolute top-0 left-1/3 -translate-x-1/2 text-romantic-500 text-sm font-bold whitespace-nowrap"
+                                        animate={{ opacity: 1, y: -45 }}
+                                        exit={{ opacity: 0, scale: 0.5 }}
+                                        className="absolute left-1/2 -translate-x-1/2 -top-2 w-max pointer-events-none"
                                     >
-                                        {thought}
-                                    </motion.span>
+                                        <span className="bg-white/90 px-3 py-1 rounded-full text-romantic-600 text-sm font-bold shadow-sm border border-romantic-100">
+                                            {thought}
+                                        </span>
+                                    </motion.div>
                                 </AnimatePresence>
                                 <motion.button
-                                    animate={{ x: noPos.x, y: noPos.y, scale: noScale }} // Apply shrinking scale
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    onMouseEnter={moveNo}
+                                    animate={{ scale: noScale }}
+                                    onMouseEnter={moveNo} // Only desktop
+                                    onTouchStart={moveNo} // For mobile
                                     onClick={moveNo}
-                                    className="bg-white/80 text-romantic-600 border-2 border-romantic-100 px-10 py-4 rounded-full font-bold hover:bg-white transition-colors backdrop-blur-sm z-50 whitespace-nowrap"
+                                    className="bg-white/80 text-romantic-600 border-2 border-romantic-100 px-10 py-4 rounded-full font-bold hover:bg-white transition-colors backdrop-blur-sm shadow-sm whitespace-nowrap"
                                 >
                                     No
                                 </motion.button>
-                            </div>
+                            </motion.div>
                         </div>
                     </motion.div>
                 )}
