@@ -1,7 +1,7 @@
 import { FloatingHearts } from './components/FloatingHearts';
 import { ValentineProposal } from './components/ValentineProposal';
-import { CountdownTimer } from './components/CountdownTimer';
-import { LoveNotes } from './components/LoveNotes';
+// import { CountdownTimer } from './components/CountdownTimer';
+// import { LoveNotes } from './components/LoveNotes';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { Music, Calendar, Heart, Share2 } from 'lucide-react';
 
