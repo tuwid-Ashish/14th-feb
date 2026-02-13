@@ -49,14 +49,14 @@ function App() {
         </section>
 
         {/* Timer Section */}
-        <section className="w-full">
+        {/* <section className="w-full">
             <CountdownTimer />
-        </section>
+        </section> */}
 
         {/* Notes Section */}
-        <section className="w-full">
+        {/* <section className="w-full">
             <LoveNotes />
-        </section>
+        </section> */}
 
         {/* Countdown Section */}
         {/* <motion.section
